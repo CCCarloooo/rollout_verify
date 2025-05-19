@@ -85,7 +85,7 @@ def main(args):
     qw3_vf_res = [extract_answer(item.outputs) for item in outputs]
 
     # 6. 计算准确率
-    ultra_acc = compute_avg_k(qw3_vf_res, 32)
+    ultra_acc = compute_avg_k(qw3_vf_res, args.k)
 
     # 7. 保存结果
     with open(args.output, 'w') as f:
@@ -99,6 +99,7 @@ if __name__ == "__main__":
     parser.add_argument('--input', type=str, required=True, help='待评测数据集（jsonl）路径')
     parser.add_argument('--output', type=str, required=True, help='输出文件名')
     parser.add_argument('--model_path', type=str, default='/mnt/new_pfs/liming_team/auroraX/LLM/Qwen3-4B', help='模型路径')
+    parser.add_argument('--k', type=int, default=32, help='计算平均准确率时使用的k值')
     args = parser.parse_args()
     main(args) 
 

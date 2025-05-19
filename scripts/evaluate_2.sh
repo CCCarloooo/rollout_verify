@@ -6,6 +6,7 @@ CUDA_DEVICES_ARRAY=(${ALL_CUDA_VISIBLE_DEVICES//,/ })
 
 BASE_DIR="/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/data/v1_scale"
 INPUT_PATH="${BASE_DIR}/processed_res.jsonl"
+
 SPLIT_PREFIX="${BASE_DIR}/post_res_split"
 OUTPUT_PREFIX="${BASE_DIR}/equiv_acc_split"
 MODEL_PATH="/mnt/new_pfs/liming_team/auroraX/LLM/Qwen3-4B"
@@ -29,6 +30,7 @@ do
         python /mnt/new_pfs/liming_team/auroraX/mxd/a_x1/new_0513/evaluate_2_equiv.py \
             --input "$split_file" \
             --output "$output_file" \
-            --model_path "$MODEL_PATH" &
+            --model_path "$MODEL_PATH" \
+            --k 32 &
     fi
 done

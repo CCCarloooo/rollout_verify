@@ -1,7 +1,7 @@
 import json
 import os
-res_dir = '/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/new_0513/data/v1_50_32_xg'
-all_res_name = [f for f in os.listdir(res_dir) if f.endswith('output.jsonl')]
+res_dir = '/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/rollout_verify/tmp1'
+all_res_name = [f for f in os.listdir(res_dir) if f.endswith('jsonl')]
 all_res_name.sort()
 
 reduce_res = []

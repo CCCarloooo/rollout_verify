@@ -1,11 +1,12 @@
 eval "$(conda shell.bash hook)"
 conda activate /AuroraX-00/share_v3/mengxiangdi/anaconda3/envs/vllmqw25
+cd /mnt/new_pfs/liming_team/auroraX/mxd/a_x1/rollout_verify
 
 ALL_CUDA_VISIBLE_DEVICES="2,3,4,5,7"
 CUDA_DEVICES_ARRAY=(${ALL_CUDA_VISIBLE_DEVICES//,/ })
 
-BASE_DIR="/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/data/v1_scale"
-INPUT_PATH="${BASE_DIR}/processed_res.jsonl"
+BASE_DIR="/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/rollout_verify/res"
+INPUT_PATH="${BASE_DIR}/pre_gen_res.jsonl"
 
 SPLIT_PREFIX="${BASE_DIR}/post_res_split"
 OUTPUT_PREFIX="${BASE_DIR}/equiv_acc_split"
@@ -27,7 +28,7 @@ do
     output_file=$(printf "${OUTPUT_PREFIX}_%02d" $idx)
     if [ -f "$split_file" ]; then
         CUDA_VISIBLE_DEVICES=${CUDA_DEVICES_ARRAY[$idx]} \
-        python /mnt/new_pfs/liming_team/auroraX/mxd/a_x1/new_0513/evaluate_2_equiv.py \
+        python evaluate_2_equiv.py \
             --input "$split_file" \
             --output "$output_file" \
             --model_path "$MODEL_PATH" \

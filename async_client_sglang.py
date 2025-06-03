@@ -6,6 +6,8 @@ import traceback
 from aiohttp import ClientTimeout
 import time
 from tqdm import tqdm
+import argparse
+
 # 异步调用API接口，发送结构化JSON请求
 async def call_api_json_async(url: str, model_name: str, system_prompt: str, user_prompt: str, schema: str, session: aiohttp.ClientSession) -> Dict[str, Any]:
     """
@@ -175,33 +177,72 @@ Args:
     url: API端点URL
     model_name: 模型名称，默认''
 """
-def get_llm_outputs(data_list: List[Dict[str, Any]], url: str='http://10.202.2.46:7374/v1/chat/completions', model_name: str='', concurrency: int = 500):
+def get_llm_outputs(data_list: List[Dict[str, Any]], url: str='http://10.202.2.46:7373/v1/chat/completions', model_name: str='', concurrency: int = 500):
     return asyncio.run(async_main(data_list, url, model_name, concurrency))
 
 if __name__ == "__main__":
     from async_client_sglang import get_llm_outputs
     import json
 
-    INPUT_FILE = '/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/rollout_verify/tmp1/batch_0.jsonl'
-    LLM_URL = 'http://10.202.2.47:7373/v1/chat/completions'
-    OUTPUT_DIR = '/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/rollout_verify/tmp1'
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--input_file', type=str, default='/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/data/Test/comp-math-24-25-rollout.jsonl')
+    parser.add_argument('--output_dir', type=str, default='/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/TestRes/Merge14BBase0528')
+    parser.add_argument('--batch_size', type=int, default=8)
+    parser.add_argument('--llm_url', type=str, default='http://10.204.23.16:7373/v1/chat/completions')
+    args = parser.parse_args()
+    
+    INPUT_FILE = args.input_file
+    LLM_URL = args.llm_url
+    OUTPUT_DIR = args.output_dir
 
     with open(INPUT_FILE, 'r') as f:
         data_list = [json.loads(line) for line in f]
 
     
-    batch_size = 10
-    batch_num = len(data_list) // batch_size
+    batch_size = args.batch_size
+    total_items = len(data_list)
+    
+    # 按照最大500条进行分批
+    max_batch_size = 500
+    
+    # 计算每批的数量
+    batches = []
     for i in range(batch_size):
-        start = i * batch_num
-        end = start + batch_num
-        batch = data_list[start:end]
+        start = i * max_batch_size
+        end = min((i + 1) * max_batch_size, total_items)
         
+        # 如果start已经超过总数据量，则为空批次
+        if start >= total_items:
+            batches.append((0, 0))
+        else:
+            batches.append((start, end))
+    
+    # 输出批次分配信息
+    non_empty_batches = [(i, start, end) for i, (start, end) in enumerate(batches) if start != end]
+    empty_batches = [i for i, (start, end) in enumerate(batches) if start == end]
+    
+    print(f"总数据量：{total_items}条，最大批次大小：{max_batch_size}条")
+    print(f"分配到{len(non_empty_batches)}个非空批次，{len(empty_batches)}个空批次")
+    for i, start, end in non_empty_batches:
+        print(f"  批次{i+1}: {start}-{end} ({end-start}条)")
+    if empty_batches:
+        print(f"  空批次: {[i+1 for i in empty_batches]}")
+    
+    for i, (start, end) in enumerate(batches):
+        if start == end:
+            # 处理空批次
+            print(f"第{i+1}批为空批次，跳过处理...")
+            output_file = f'{OUTPUT_DIR}/batch_{i}.jsonl'
+            # 创建空文件
+            with open(output_file, 'w') as f:
+                pass  # 创建空文件
+            continue
+            
         # 执行多进程处理
-        print(f"开始多进程处理第{i+1}批数据...")
+        print(f"开始多进程处理第{i+1}批数据...({start}到{end}，共{end-start}条)")
         start_time = time.time()
-        cur_batach = data_list[start:end]
-        tmp_res = get_llm_outputs(cur_batach, url=LLM_URL)
+        cur_batch = data_list[start:end]
+        tmp_res = get_llm_outputs(cur_batch, url=LLM_URL)
         end_time = time.time()
         print(f"多进程处理完成，耗时：{end_time - start_time:.2f}秒")
         

@@ -1,0 +1,49 @@
+# 任务配置
+task:
+  name_prefix: "Marco_deepseek"  # 会自动加上时间戳
+  output_root: "/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/TestRes"
+
+# 模型路径配置
+models:
+  marco: "/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/TrainRes/SFTQwen7B-0527/checkpoint-948"
+  rollout: "/mnt/new_pfs/liming_team/auroraX/LLM/LIMO"
+  eval: "/mnt/new_pfs/liming_team/auroraX/LLM/Qwen3-4B"
+
+# 数据配置
+data:
+  input_jsonl: "/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/data/Test/comp-math-24-25.jsonl"
+
+# 运行时配置
+runtime:
+  copy: 1
+  prerollout_mode: "plan"  # "base" 或 "plan"
+  service_mode: "remote"    # "local" 或 "remote"
+  batch_size: 8
+  sglang_cuda: "0,1,2,3"
+  vllm_cuda: "4,5,6,7"
+  sglang_port: 7373
+  sglang_url: "http://10.202.4.81:8001"  # remote模式使用
+
+# 环境配置
+environment:
+  conda_env: "/opt/conda/envs/vllmqw25"
+  session_name: "0"
+
+# 脚本路径配置
+scripts:
+  run_sglang: "/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/RunSglang/run_sglang.sh"
+  prerollout: "/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/RolloutVerify/PreRollout.py"
+  async_client: "/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/RolloutVerify/async_client_sglang.py"
+  processed_rollout: "/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/RolloutVerify/scripts/ProcessedRollout.py"
+  evaluate_equiv: "/mnt/new_pfs/liming_team/auroraX/mxd/a_x1/RolloutVerify/evaluate_2_equiv.py"
+
+# 检查参数配置
+checks:
+  max_gen_checks: 30
+  gen_check_interval: 20
+  max_wait_time: 300
+  wait_interval: 10
+  max_batch_checks: 20
+  batch_check_interval: 30
+  max_eval_checks: 30
+  eval_check_interval: 10

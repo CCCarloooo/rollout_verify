@@ -1,0 +1,1 @@
+bash /mnt/new_pfs/liming_team/auroraX/mxd/a_x1/RolloutVerify/scripts/EvaluateMarco.sh /mnt/new_pfs/liming_team/auroraX/mxd/a_x1/RolloutVerify/scripts/run.yaml
